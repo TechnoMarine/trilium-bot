@@ -18,5 +18,7 @@
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
     "declarationMap": true,
+    "strict": false,
+    "preserveSymlinks": true
   }
 }

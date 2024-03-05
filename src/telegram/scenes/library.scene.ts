@@ -5,11 +5,12 @@ import { Markup } from 'telegraf';
 import { BaseScene } from './base.scene';
 
 const SceneCommands = {
-  library: 'Библиотека',
+  bookList: 'Список книг',
+  bookDownload: 'Скачать книгу',
   back: 'Назад',
 } as const;
 
-@Scene(SCENES.WELCOME_SCENE)
+@Scene(SCENES.LIBRARY_SCENE)
 export class WelcomeScene extends BaseScene {
   @SceneEnter()
   async onSceneEnter(@Ctx() ctx: TelegrafContext) {
@@ -26,7 +27,7 @@ export class WelcomeScene extends BaseScene {
     return Markup.keyboard(buttons).oneTime().resize();
   }
 
-  @Hears(SceneCommands.library)
+  @Hears(SceneCommands.bookDownload)
   async bookDownload(@Ctx() ctx: TelegrafContext) {
     await ctx.reply('Теперь вы можете скачать книгу');
     return;
