@@ -29,10 +29,13 @@ export class TriliumService {
   async getBookList() {
     const response = await this.triliumPreRequest.get(
       this.notesParam + '/' + this.bookStorageId,
-      { responseType: 'json' },
+      {
+        responseType: 'json',
+      },
     );
     const data: ILibrabyReponse = response.data;
-    await this.getBooksNameFromTrilium(data.childNoteIds);
+    const booksName = await this.getBooksNameFromTrilium(data.childNoteIds);
+    return await this.buildBookListMessage(booksName);
   }
 
   private async getBooksNameFromTrilium(
@@ -50,5 +53,17 @@ export class TriliumService {
       names.set(data.title, id);
     }
     return names;
+  }
+
+  private async buildBookListMessage(
+    booksMap: Map<string, string>,
+  ): Promise<string> {
+    const msg: string[] = [];
+    let i: number = 0;
+    for (const key of booksMap.entries()) {
+      msg.push(`${i}. ${key[0]}`);
+      i++;
+    }
+    return msg.join('\n');
   }
 }

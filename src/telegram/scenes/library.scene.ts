@@ -19,10 +19,13 @@ export class LibraryScene extends BaseScene {
 
   @SceneEnter()
   async onSceneEnter(@Ctx() ctx: TelegrafContext) {
-    return await ctx.reply('кнопки', await this.buildSceneKeyboard());
+    return await ctx.reply(
+      'Выберите действие',
+      await this.buildSceneKeyboard(),
+    );
   }
 
-  async buildSceneKeyboard() {
+  private async buildSceneKeyboard() {
     const buttons = [];
     for (const key in SceneCommands) {
       buttons.push(Markup.button.text(SceneCommands[key]));
@@ -31,9 +34,12 @@ export class LibraryScene extends BaseScene {
   }
 
   @Hears(SceneCommands.bookList)
-  async getListbook(@Ctx() ctx: TelegrafContext) {
-    const books = await this.triliumService.getBookList();
-    return await ctx.reply(`список книг: ${books}`);
+  async getListBook(@Ctx() ctx: TelegrafContext) {
+    const msg = await this.triliumService.getBookList();
+    return await ctx.reply(
+      `Cписок книг: \n ${msg}`,
+      await this.buildSceneKeyboard(),
+    );
   }
 
   @Hears(SceneCommands.bookDownload)
