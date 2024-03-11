@@ -1,4 +1,4 @@
-import { Update, Ctx, Start, Help, On, Hears } from 'nestjs-telegraf';
+import { Update, Ctx, Start, On, Hears } from 'nestjs-telegraf';
 import { TelegrafContext } from './telegram.interfaces';
 import { SCENES } from './telegram.scenes';
 
@@ -6,22 +6,16 @@ import { SCENES } from './telegram.scenes';
 export class TelegramService {
   @Start()
   async start(@Ctx() ctx: TelegrafContext) {
-    await ctx.reply('Welcome');
+    await ctx.scene.enter(SCENES.WELCOME_SCENE);
   }
 
-  @Help()
-  async help(@Ctx() ctx: TelegrafContext) {
-    await ctx.reply('Send me a sticker');
-  }
-
-  @On('sticker')
-  async on(@Ctx() ctx: TelegrafContext) {
-    await ctx.reply('👍');
+  @On('text')
+  async onText(@Ctx() ctx: TelegrafContext) {
     await ctx.scene.enter(SCENES.WELCOME_SCENE);
   }
 
   @Hears('hi')
   async hears(@Ctx() ctx: TelegrafContext) {
-    await ctx.scene.enter(SCENES.WELCOME_SCENE);
+    return await ctx.reply('hi');
   }
 }

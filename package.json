@@ -26,6 +26,7 @@
     "@nestjs/mapped-types": "^2.0.5",
     "@nestjs/platform-express": "^10.3.3",
     "@telegraf/session": "2.0.0-beta.7",
+    "axios": "^1.6.7",
     "nestjs-telegraf": "^2.7.0",
     "reflect-metadata": "^0.2.1",
     "rxjs": "^7.8.1",

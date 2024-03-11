@@ -4,9 +4,11 @@ import { ConfigService } from '@nestjs/config';
 import { session } from 'telegraf';
 import { TelegramService } from './telegram.service';
 import { WelcomeScene } from './scenes/welcome.scene';
+import { LibraryScene } from './scenes/library.scene';
+import { TriliumModule } from '../trilium/trilium.module';
 
 @Module({
-  providers: [TelegramService, WelcomeScene],
+  providers: [TelegramService, WelcomeScene, LibraryScene],
   imports: [
     TelegrafModule.forRootAsync({
       useFactory: (configService: ConfigService) => {
@@ -18,6 +20,7 @@ import { WelcomeScene } from './scenes/welcome.scene';
       },
       inject: [ConfigService],
     }),
+    TriliumModule,
   ],
 })
 export class TelegramModule {}

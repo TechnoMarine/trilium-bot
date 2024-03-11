@@ -14,7 +14,7 @@ export class WelcomeScene extends BaseScene {
   @SceneEnter()
   async onSceneEnter(@Ctx() ctx: TelegrafContext) {
     await ctx.reply('You are in welcome scene');
-    await ctx.reply('кнопки', await this.buildSceneKeyboard());
+    await ctx.reply('welcome', await this.buildSceneKeyboard());
     return;
   }
 
@@ -28,7 +28,7 @@ export class WelcomeScene extends BaseScene {
 
   @Hears(SceneCommands.library)
   async bookDownload(@Ctx() ctx: TelegrafContext) {
-    await ctx.reply('Теперь вы можете скачать книгу');
+    await ctx.scene.enter(SCENES.LIBRARY_SCENE);
     return;
   }
 

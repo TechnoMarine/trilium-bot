@@ -3,6 +3,7 @@ import { TelegrafContext } from '../telegram.interfaces';
 import { SCENES } from '../telegram.scenes';
 import { Markup } from 'telegraf';
 import { BaseScene } from './base.scene';
+import { TriliumService } from '../../trilium/trilium.service';
 
 const SceneCommands = {
   bookList: 'Список книг',
@@ -11,12 +12,14 @@ const SceneCommands = {
 } as const;
 
 @Scene(SCENES.LIBRARY_SCENE)
-export class WelcomeScene extends BaseScene {
+export class LibraryScene extends BaseScene {
+  constructor(private readonly triliumService: TriliumService) {
+    super();
+  }
+
   @SceneEnter()
   async onSceneEnter(@Ctx() ctx: TelegrafContext) {
-    await ctx.reply('You are in welcome scene');
-    await ctx.reply('кнопки', await this.buildSceneKeyboard());
-    return;
+    return await ctx.reply('кнопки', await this.buildSceneKeyboard());
   }
 
   async buildSceneKeyboard() {
@@ -27,6 +30,12 @@ export class WelcomeScene extends BaseScene {
     return Markup.keyboard(buttons).oneTime().resize();
   }
 
+  @Hears(SceneCommands.bookList)
+  async getListbook(@Ctx() ctx: TelegrafContext) {
+    const books = await this.triliumService.getBookList();
+    return await ctx.reply(`список книг: ${books}`);
+  }
+
   @Hears(SceneCommands.bookDownload)
   async bookDownload(@Ctx() ctx: TelegrafContext) {
     await ctx.reply('Теперь вы можете скачать книгу');
@@ -35,6 +44,6 @@ export class WelcomeScene extends BaseScene {
 
   @Command(SceneCommands.back)
   async exit(@Ctx() ctx: TelegrafContext) {
-    return ctx.reply('Вы вышли из сцены');
+    return ctx.scene.enter(SCENES.WELCOME_SCENE);
   }
 }
