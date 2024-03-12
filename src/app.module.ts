@@ -6,7 +6,11 @@ import { ConfigModule } from '@nestjs/config';
 import { TriliumModule } from './trilium/trilium.module';
 
 @Module({
-  imports: [TelegramModule, ConfigModule.forRoot({ envFilePath: '.env', isGlobal: true }), TriliumModule],
+  imports: [
+    TelegramModule,
+    ConfigModule.forRoot({ envFilePath: '.env', isGlobal: true }),
+    TriliumModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

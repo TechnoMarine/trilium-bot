@@ -4,6 +4,9 @@ import { ILibrabyReponse } from './trilium.interaces';
 import axios from 'axios';
 import { AxiosInstance } from 'axios';
 
+type BookNumber = string;
+type BookName = string;
+
 @Injectable()
 export class TriliumService {
   logger = new Logger('Trillium service');
@@ -27,21 +30,19 @@ export class TriliumService {
   }
 
   async getBookList() {
-    const response = await this.triliumPreRequest.get(
-      this.notesParam + '/' + this.bookStorageId,
-      {
-        responseType: 'json',
-      },
-    );
-    const data: ILibrabyReponse = response.data;
-    const booksName = await this.getBooksNameFromTrilium(data.childNoteIds);
+    const booksName = await this.getBooksName();
     return await this.buildBookListMessage(booksName);
   }
 
-  private async getBooksNameFromTrilium(
+  public async getBooksName(): Promise<Map<BookNumber, BookName>> {
+    const data: ILibrabyReponse = await this.fetchBooksNode();
+    return await this.getBooksNameFromTriliumByIds(data.childNoteIds);
+  }
+
+  private async getBooksNameFromTriliumByIds(
     ids: string[],
-  ): Promise<Map<string, string>> {
-    const names: Map<string, string> = new Map<string, string>([]);
+  ): Promise<Map<BookNumber, BookName>> {
+    const names: Map<BookNumber, BookName> = new Map<string, string>([]);
     for (const id of ids) {
       const response = await this.triliumPreRequest.get(
         this.notesParam + '/' + id,
@@ -55,7 +56,7 @@ export class TriliumService {
     return names;
   }
 
-  private async buildBookListMessage(
+  public async buildBookListMessage(
     booksMap: Map<string, string>,
   ): Promise<string> {
     const msg: string[] = [];
@@ -65,5 +66,15 @@ export class TriliumService {
       i++;
     }
     return msg.join('\n');
+  }
+
+  private async fetchBooksNode() {
+    const response = await this.triliumPreRequest.get(
+      this.notesParam + '/' + this.bookStorageId,
+      {
+        responseType: 'json',
+      },
+    );
+    return response.data;
   }
 }

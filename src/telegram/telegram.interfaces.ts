@@ -1,8 +1,8 @@
-import { Context as BaseContext } from 'telegraf';
+import { Context } from 'telegraf';
 import { SceneContextScene } from 'telegraf/typings/scenes';
 import { SCENES } from './telegram.scenes';
 
-export type TelegrafContext = BaseContext & {
+export type TelegrafContext = Context & {
   scene: ISceneContextScene;
 };
 

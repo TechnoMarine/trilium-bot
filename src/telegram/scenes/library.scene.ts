@@ -1,4 +1,12 @@
-import { Command, Ctx, Hears, Scene, SceneEnter } from 'nestjs-telegraf';
+import {
+  Command,
+  Ctx,
+  Hears,
+  Next,
+  On,
+  Scene,
+  SceneEnter,
+} from 'nestjs-telegraf';
 import { TelegrafContext } from '../telegram.interfaces';
 import { SCENES } from '../telegram.scenes';
 import { Markup } from 'telegraf';
@@ -44,8 +52,33 @@ export class LibraryScene extends BaseScene {
 
   @Hears(SceneCommands.bookDownload)
   async bookDownload(@Ctx() ctx: TelegrafContext) {
-    await ctx.reply('Теперь вы можете скачать книгу');
-    return;
+    await ctx.reply('Выберите книгу из списка ниже');
+    const booksName = await this.triliumService.getBooksName();
+    ctx.scene.session.state['otherData'] = {
+      bookDownloadState: true,
+      bookList: booksName,
+    };
+    await ctx.reply(await this.triliumService.buildBookListMessage(booksName));
+  }
+
+  @On('text')
+  async bookDownloadSelected(@Ctx() ctx: TelegrafContext, @Next() next) {
+    if (
+      ctx.scene.session.state['otherData'].hasOwnProperty('bookDownloadState')
+    ) {
+      if (!ctx.state.otherData['bookDownloadState']) {
+        return next();
+      }
+    }
+    // try {
+    //   const bookNumber = Number(ctx.message);
+    //   const bookNodeId = ctx.scene.otherData['bookList'][bookNumber];
+    //   console.log(bookNodeId);
+    // } catch (e) {
+    //   delete ctx.scene.otherData['bookDownloadState'];
+    //   delete ctx.scene.otherData['bookList'];
+    //   return await ctx.reply('Неверный формат');
+    // }
   }
 
   @Command(SceneCommands.back)
