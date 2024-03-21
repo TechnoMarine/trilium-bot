@@ -8,4 +8,18 @@ export type TelegrafContext = Context & {
 
 interface ISceneContextScene extends SceneContextScene<TelegrafContext> {
   enter: (sceneId: (typeof SCENES)[keyof typeof SCENES]) => Promise<unknown>;
+  session: ISession;
+}
+
+interface ISession {
+  state: IState;
+}
+
+interface IState {
+  otherData: IOtherData;
+}
+
+interface IOtherData {
+  bookDownloadState?: boolean;
+  bookMap: Map<string, string>;
 }

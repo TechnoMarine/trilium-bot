@@ -54,11 +54,24 @@ export class LibraryScene extends BaseScene {
   async bookDownload(@Ctx() ctx: TelegrafContext) {
     await ctx.reply('Выберите книгу из списка ниже');
     const booksName = await this.triliumService.getBooksName();
+
+    const numeratedBooks = new Map();
+    let i = 0;
+    for (const [bookId, bookName] of booksName.entries()) {
+      numeratedBooks.set(i, [bookId, bookName]);
+      i++;
+    }
+
+    let msg = '';
+    // let bookMsg = await this.triliumService.buildBookListMessage(booksName);
+    for (const [num, book] of numeratedBooks.entries()) {
+      msg += `${num}. ${book[1]}\n`;
+    }
     ctx.scene.session.state['otherData'] = {
       bookDownloadState: true,
-      bookList: booksName,
+      bookMap: numeratedBooks,
     };
-    await ctx.reply(await this.triliumService.buildBookListMessage(booksName));
+    await ctx.reply(msg);
   }
 
   @On('text')
@@ -66,19 +79,21 @@ export class LibraryScene extends BaseScene {
     if (
       ctx.scene.session.state['otherData'].hasOwnProperty('bookDownloadState')
     ) {
-      if (!ctx.state.otherData['bookDownloadState']) {
+      if (!ctx.scene.session.state['otherData']['bookDownloadState']) {
         return next();
       }
     }
-    // try {
-    //   const bookNumber = Number(ctx.message);
-    //   const bookNodeId = ctx.scene.otherData['bookList'][bookNumber];
-    //   console.log(bookNodeId);
-    // } catch (e) {
-    //   delete ctx.scene.otherData['bookDownloadState'];
-    //   delete ctx.scene.otherData['bookList'];
-    //   return await ctx.reply('Неверный формат');
-    // }
+    const { otherData } = ctx.scene.session.state;
+    const { bookMap } = otherData;
+    try {
+      const bookNumber = ctx.message.text;
+      const bookNode = bookMap.get(bookNumber);
+      await ctx.reply(`Вы выбрали книгу с id ${bookNode[0]}`);
+    } catch (e) {
+      delete otherData['bookDownloadState'];
+      delete otherData['bookList'];
+      return await ctx.reply('Неверный формат');
+    }
   }
 
   @Command(SceneCommands.back)

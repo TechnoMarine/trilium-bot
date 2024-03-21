@@ -4,8 +4,9 @@ import { ILibrabyReponse } from './trilium.interaces';
 import axios from 'axios';
 import { AxiosInstance } from 'axios';
 
-type BookNumber = string;
+type BookId = string;
 type BookName = string;
+type MapBook = Map<BookId, BookName>;
 
 @Injectable()
 export class TriliumService {
@@ -34,15 +35,13 @@ export class TriliumService {
     return await this.buildBookListMessage(booksName);
   }
 
-  public async getBooksName(): Promise<Map<BookNumber, BookName>> {
+  public async getBooksName(): Promise<MapBook> {
     const data: ILibrabyReponse = await this.fetchBooksNode();
     return await this.getBooksNameFromTriliumByIds(data.childNoteIds);
   }
 
-  private async getBooksNameFromTriliumByIds(
-    ids: string[],
-  ): Promise<Map<BookNumber, BookName>> {
-    const names: Map<BookNumber, BookName> = new Map<string, string>([]);
+  private async getBooksNameFromTriliumByIds(ids: string[]): Promise<MapBook> {
+    const names: Map<BookId, BookName> = new Map<string, string>([]);
     for (const id of ids) {
       const response = await this.triliumPreRequest.get(
         this.notesParam + '/' + id,
@@ -51,7 +50,7 @@ export class TriliumService {
         },
       );
       const data: ILibrabyReponse = response.data;
-      names.set(data.title, id);
+      names.set(id, data.title);
     }
     return names;
   }
