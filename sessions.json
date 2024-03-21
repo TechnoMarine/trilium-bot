@@ -7,7 +7,19 @@
           "current": "LIBRARY_SCENE",
           "state": {
             "otherData": {
-              "bookDownloadState": true,
+              "bookMap": {}
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "281103370:281103370",
+      "data": {
+        "__scenes": {
+          "current": "LIBRARY_SCENE",
+          "state": {
+            "otherData": {
               "bookMap": {}
             }
           }

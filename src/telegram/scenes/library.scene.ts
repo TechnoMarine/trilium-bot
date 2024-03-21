@@ -58,12 +58,11 @@ export class LibraryScene extends BaseScene {
     const numeratedBooks = new Map();
     let i = 0;
     for (const [bookId, bookName] of booksName.entries()) {
-      numeratedBooks.set(i, [bookId, bookName]);
+      numeratedBooks.set(String(i), [bookId, bookName]);
       i++;
     }
 
     let msg = '';
-    // let bookMsg = await this.triliumService.buildBookListMessage(booksName);
     for (const [num, book] of numeratedBooks.entries()) {
       msg += `${num}. ${book[1]}\n`;
     }
@@ -88,11 +87,20 @@ export class LibraryScene extends BaseScene {
     try {
       const bookNumber = ctx.message.text;
       const bookNode = bookMap.get(bookNumber);
-      await ctx.reply(`Вы выбрали книгу с id ${bookNode[0]}`);
+      await ctx.reply(`Вы выбрали книгу ${bookNode[1]}. Отправка началась`);
+      const bookStream = await this.triliumService.getNodeContentStream(
+        bookNode[0],
+      );
+      await ctx.replyWithDocument({
+        source: bookStream,
+        filename: bookNode[1],
+      });
     } catch (e) {
+      return await ctx.reply('Не удалось загрузить книгу: ' + e);
+    } finally {
       delete otherData['bookDownloadState'];
       delete otherData['bookList'];
-      return await ctx.reply('Неверный формат');
+      delete otherData['bookMap'];
     }
   }
 

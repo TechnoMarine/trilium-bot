@@ -23,7 +23,7 @@ export class TriliumService {
     this.triliumApiKey = this.configService.get('TRILIUM_API_KEY');
     this.triliumPreRequest = axios.create({
       baseURL: new URL(this.triliumUrl).href,
-      timeout: 2000,
+      timeout: 5000,
       headers: {
         Authorization: this.triliumApiKey,
       },
@@ -36,6 +36,7 @@ export class TriliumService {
   }
 
   public async getBooksName(): Promise<MapBook> {
+    this.logger.log('Books fetch start');
     const data: ILibrabyReponse = await this.fetchBooksNode();
     return await this.getBooksNameFromTriliumByIds(data.childNoteIds);
   }
@@ -61,7 +62,7 @@ export class TriliumService {
     const msg: string[] = [];
     let i: number = 0;
     for (const key of booksMap.entries()) {
-      msg.push(`${i}. ${key[0]}`);
+      msg.push(`${i}. ${key[1]}`);
       i++;
     }
     return msg.join('\n');
@@ -74,6 +75,17 @@ export class TriliumService {
         responseType: 'json',
       },
     );
+    return response.data;
+  }
+
+  public async getNodeContentStream(noteId): Promise<ReadableStream> {
+    const response = await this.triliumPreRequest.get(
+      this.notesParam + '/' + noteId + '/content',
+      {
+        responseType: 'stream',
+      },
+    );
+
     return response.data;
   }
 }
