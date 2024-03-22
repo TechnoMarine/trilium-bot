@@ -1,21 +1,24 @@
 import { Logger } from '@nestjs/common';
 import { TelegrafContext } from './telegram.interfaces';
 
-const logger = new Logger('Top level logger');
+const logger = new Logger('Scene command log');
 
-export function CatchErrorAsync(
+export function CatchSceneCommandErrorAsync(
   target: any,
   propertyKey: string,
   descriptor: PropertyDescriptor,
 ) {
   const originalMethod = descriptor.value;
-  descriptor.value = async function (ctx: TelegrafContext, ...args: any[]) {
+  descriptor.value = async function (
+    ctx: TelegrafContext,
+    next: any,
+    ...args: any[]
+  ) {
     try {
-      logger.verbose('Decorator works');
-      return await originalMethod.apply(this, [ctx, args]);
+      return await originalMethod.apply(this, [ctx, next, args]);
     } catch (e) {
-      logger.verbose(`${originalMethod.name} error. Description : ${e}`);
-      await ctx.reply('Error in decorator');
+      logger.error(`${originalMethod.name} error. Description : ${e}`);
+      await ctx.reply(`[Error in command ${originalMethod.name}]. ${e}`);
       await ctx.scene.reenter();
       return;
     }

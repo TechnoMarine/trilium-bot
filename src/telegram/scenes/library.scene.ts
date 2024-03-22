@@ -12,8 +12,9 @@ import { SCENES } from '../telegram.scenes';
 import { Markup } from 'telegraf';
 import { BaseScene } from './base.scene';
 import { TriliumService } from '../../trilium/trilium.service';
-import { CatchErrorAsync } from '../bot.decorators';
+import { CatchSceneCommandErrorAsync } from '../bot.decorators';
 import { Logger } from '@nestjs/common';
+import { numberValidate } from '../telegram.validators';
 
 const SceneCommands = {
   bookList: 'Список книг',
@@ -31,10 +32,8 @@ export class LibraryScene extends BaseScene {
 
   @SceneEnter()
   async onSceneEnter(@Ctx() ctx: TelegrafContext) {
-    return await ctx.reply(
-      'Выберите действие',
-      await this.buildSceneKeyboard(),
-    );
+    await ctx.reply(`Выберите действие`, await this.buildSceneKeyboard());
+    return;
   }
 
   private async buildSceneKeyboard() {
@@ -48,16 +47,14 @@ export class LibraryScene extends BaseScene {
   @Hears(SceneCommands.bookList)
   async getListBook(@Ctx() ctx: TelegrafContext) {
     const msg = await this.triliumService.getBookList();
-    return await ctx.reply(
-      `Cписок книг: \n ${msg}`,
-      await this.buildSceneKeyboard(),
-    );
+    await ctx.reply(`Cписок книг: \n ${msg}`, await this.buildSceneKeyboard());
+    return;
   }
 
   @Hears(SceneCommands.bookDownload)
-  @CatchErrorAsync
+  @CatchSceneCommandErrorAsync
   async bookDownload(@Ctx() ctx: TelegrafContext) {
-    await ctx.reply('Выберите книгу из списка ниже');
+    await ctx.reply(`Выберите книгу из списка ниже`);
     const booksName = await this.triliumService.getBooksName();
 
     const numeratedBooks = new Map();
@@ -76,23 +73,31 @@ export class LibraryScene extends BaseScene {
       bookMap: numeratedBooks,
     };
     await ctx.reply(msg);
+    return;
   }
 
   @On('text')
-  @CatchErrorAsync
+  @CatchSceneCommandErrorAsync
   async bookDownloadSelected(@Ctx() ctx: TelegrafContext, @Next() next) {
-    if (
-      ctx.scene.session.state['otherData'].hasOwnProperty('bookDownloadState')
-    ) {
-      if (!ctx.scene.session.state['otherData']['bookDownloadState']) {
-        return next();
-      }
-    }
     const { otherData } = ctx.scene.session.state;
+
+    if (!otherData?.bookDownloadState) {
+      return await next();
+    }
+
     const { bookMap } = otherData;
+    const bookNumber = ctx.message.text;
+    if (!numberValidate(bookNumber)) {
+      await ctx.reply('Неверный формат ввода. Повторите попытку');
+      return;
+    }
+    const bookNode = bookMap?.get(bookNumber);
+
+    if (!bookNode) {
+      return await next(); // Assuming here that if the book number doesn't exist, it should proceed to the next middleware.
+    }
+
     try {
-      const bookNumber = ctx.message.text;
-      const bookNode = bookMap.get(bookNumber);
       await ctx.reply(`Вы выбрали книгу ${bookNode[1]}. Отправка началась`);
       const bookStream = await this.triliumService.getNodeContentStream(
         bookNode[0],
@@ -101,8 +106,7 @@ export class LibraryScene extends BaseScene {
         source: bookStream,
         filename: bookNode[1],
       });
-    } catch (e) {
-      return await ctx.reply('Не удалось загрузить книгу: ' + e);
+      return;
     } finally {
       delete otherData['bookDownloadState'];
       delete otherData['bookList'];
@@ -112,6 +116,7 @@ export class LibraryScene extends BaseScene {
 
   @Command(SceneCommands.back)
   async exit(@Ctx() ctx: TelegrafContext) {
-    return ctx.scene.enter(SCENES.WELCOME_SCENE);
+    await ctx.scene.enter(SCENES.WELCOME_SCENE);
+    return;
   }
 }

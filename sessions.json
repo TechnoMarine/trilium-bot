@@ -4,10 +4,8 @@
       "id": "380188884:380188884",
       "data": {
         "__scenes": {
-          "current": "LIBRARY_SCENE",
-          "state": {
-            "otherData": {}
-          }
+          "current": "WELCOME_SCENE",
+          "state": {}
         }
       }
     },

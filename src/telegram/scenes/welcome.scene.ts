@@ -1,4 +1,4 @@
-import { Command, Ctx, Hears, Scene, SceneEnter } from 'nestjs-telegraf';
+import { Ctx, Hears, Scene, SceneEnter } from 'nestjs-telegraf';
 import { TelegrafContext } from '../telegram.interfaces';
 import { SCENES } from '../telegram.scenes';
 import { Markup } from 'telegraf';
@@ -6,7 +6,6 @@ import { BaseScene } from './base.scene';
 
 const SceneCommands = {
   library: 'Библиотека',
-  back: 'Назад',
 } as const;
 
 @Scene(SCENES.WELCOME_SCENE)
@@ -30,10 +29,5 @@ export class WelcomeScene extends BaseScene {
   async bookDownload(@Ctx() ctx: TelegrafContext) {
     await ctx.scene.enter(SCENES.LIBRARY_SCENE);
     return;
-  }
-
-  @Command(SceneCommands.back)
-  async exit(@Ctx() ctx: TelegrafContext) {
-    return ctx.reply('Вы вышли из сцены');
   }
 }
