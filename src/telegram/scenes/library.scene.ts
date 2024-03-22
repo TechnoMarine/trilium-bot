@@ -12,6 +12,8 @@ import { SCENES } from '../telegram.scenes';
 import { Markup } from 'telegraf';
 import { BaseScene } from './base.scene';
 import { TriliumService } from '../../trilium/trilium.service';
+import { CatchErrorAsync } from '../bot.decorators';
+import { Logger } from '@nestjs/common';
 
 const SceneCommands = {
   bookList: 'Список книг',
@@ -21,6 +23,8 @@ const SceneCommands = {
 
 @Scene(SCENES.LIBRARY_SCENE)
 export class LibraryScene extends BaseScene {
+  private logger = new Logger('LibraryScene');
+
   constructor(private readonly triliumService: TriliumService) {
     super();
   }
@@ -51,6 +55,7 @@ export class LibraryScene extends BaseScene {
   }
 
   @Hears(SceneCommands.bookDownload)
+  @CatchErrorAsync
   async bookDownload(@Ctx() ctx: TelegrafContext) {
     await ctx.reply('Выберите книгу из списка ниже');
     const booksName = await this.triliumService.getBooksName();
@@ -74,6 +79,7 @@ export class LibraryScene extends BaseScene {
   }
 
   @On('text')
+  @CatchErrorAsync
   async bookDownloadSelected(@Ctx() ctx: TelegrafContext, @Next() next) {
     if (
       ctx.scene.session.state['otherData'].hasOwnProperty('bookDownloadState')

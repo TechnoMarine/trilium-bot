@@ -6,9 +6,7 @@
         "__scenes": {
           "current": "LIBRARY_SCENE",
           "state": {
-            "otherData": {
-              "bookMap": {}
-            }
+            "otherData": {}
           }
         }
       }

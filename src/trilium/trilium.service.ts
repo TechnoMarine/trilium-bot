@@ -78,7 +78,7 @@ export class TriliumService {
     return response.data;
   }
 
-  public async getNodeContentStream(noteId): Promise<ReadableStream> {
+  public async getNodeContentStream(noteId: string): Promise<ReadableStream> {
     const response = await this.triliumPreRequest.get(
       this.notesParam + '/' + noteId + '/content',
       {
